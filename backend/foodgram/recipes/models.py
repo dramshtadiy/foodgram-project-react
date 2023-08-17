@@ -29,7 +29,8 @@ class Tag(models.Model):
         "Палитра цвета в формате HEX",
         unique=True,
         max_length=7,
-        validators=[RegexValidator(regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")],
+        validators=[
+            RegexValidator(regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")],
     )
     slug = models.SlugField("слаг", unique=True, max_length=144)
 
@@ -57,11 +58,14 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(
         "Время приготовления",
         validators=[
-            MinValueValidator(1, "Время приготовления не должно быть меньше 1 минуты")
+            MinValueValidator(
+                1, "Время приготовления не должно быть меньше 1 минуты")
         ],
     )
 
-    tags = models.ManyToManyField(Tag, related_name="recipes", verbose_name="Теги")
+    tags = models.ManyToManyField(Tag,
+                                  related_name="recipes",
+                                  verbose_name="Теги")
 
     class Meta:
         ordering = [
@@ -91,7 +95,9 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveSmallIntegerField(
         "Количество",
         validators=[
-            MinValueValidator(1, "Время приготовления не должно быть меньше 1 минуты")
+            MinValueValidator(
+                1,
+                "Время приготовления не должно быть меньше 1 минуты")
         ],
     )
 
@@ -123,7 +129,8 @@ class Favourites(models.Model):
         verbose_name = "избранное"
         verbose_name_plural = "избранное"
         constraints = [
-            UniqueConstraint(fields=["user", "recipe"], name="unique_favourite")
+            UniqueConstraint(fields=["user", "recipe"],
+                             name="unique_favourite")
         ]
 
     def __str__(self):
@@ -147,7 +154,8 @@ class Carts(models.Model):
     class Meta:
         verbose_name = "корзина"
         verbose_name_plural = "корзины"
-        constraints = [UniqueConstraint(fields=["user", "recipe"], name="unique_carts")]
+        constraints = [UniqueConstraint(fields=["user", "recipe"],
+                                        name="unique_carts")]
 
     def __str__(self):
         return f"{self.user} добавил в козину {self.recipe} "

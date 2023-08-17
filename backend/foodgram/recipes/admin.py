@@ -1,12 +1,13 @@
 from django.contrib import admin
 from django.contrib.admin import display
 
-from .models import Favourites, Ingredient, RecipeIngredient, Recipe, Carts, Tag
+from .models import (Carts, Favourites, Ingredient, Recipe, RecipeIngredient,
+                     Tag)
 
 
 class IngredientInLine(admin.TabularInline):
     """
-    Инлайн для добавления ингредиентов при создании рецепта через админ-панель.
+    Инлайн для добавления ингредиентов при создании рецепта через админку.
     """
 
     model = RecipeIngredient

@@ -4,27 +4,22 @@ from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import permissions
-from rest_framework import status, exceptions
+from recipes.models import (Carts, Favourites, Ingredient, Recipe,
+                            RecipeIngredient, Tag)
+from rest_framework import exceptions, permissions, status
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-
-from recipes.models import Carts, Favourites, Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import Subscribe, User
+
 from .filters import RecipeFilter
 from .paginations import PageLimitPagination
 from .permissions import IsAuthorOrReadOnly
-from .serializers import (
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeShortSerializer,
-    RecipeWriteSerializer,
-    TagSerializer,
-    CustomUserSerializer,
-    SubscribeSerializer,
-)
+from .serializers import (CustomUserSerializer, IngredientSerializer,
+                          RecipeReadSerializer, RecipeShortSerializer,
+                          RecipeWriteSerializer, SubscribeSerializer,
+                          TagSerializer)
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
@@ -124,19 +119,20 @@ class RecipeViewSet(ModelViewSet):
             .values_list("recipe_id", flat=True)
         )
         output = io.StringIO()
-        data_ingredient: dict = {}
+        data = {}
         for recipe in carts:
             ingredients = RecipeIngredient.objects.values_list(
                 "ingredient__name", "ingredient__measurement_unit", "amount"
             ).filter(recipe_id=recipe)
             for item in ingredients:
-                if item[0] in data_ingredient:
-                    data_ingredient[item[0]]["amount"] += int(item[2])
+                if item[0] in data:
+                    data[item[0]]["amount"] += int(item[2])
                 else:
-                    data_ingredient[item[0]] = {"amount": int(item[2]), "unit": item[1]}
-        for key in data_ingredient.keys():
+                    data[item[0]] = {
+                        "amount": int(item[2]), "unit": item[1]}
+        for key in data.keys():
             output.write(
-                f'{key} - {data_ingredient[key]["amount"]} {data_ingredient[key]["unit"]}\n'
+                f'{key} - {data[key]["amount"]} {data[key]["unit"]}\n'
             )
         filename = "carts.txt"
         response = FileResponse(output.getvalue(), content_type="text.txt")
@@ -167,7 +163,9 @@ class CustomUserViewSet(UserViewSet):
         """Получение подписок."""
         queryset = User.objects.filter(subscribing__user=request.user.pk)
         pages = self.paginate_queryset(queryset=queryset)
-        serializer = SubscribeSerializer(pages, many=True, context={"request": request})
+        serializer = SubscribeSerializer(pages,
+                                         many=True,
+                                         context={"request": request})
         return self.get_paginated_response(serializer.data)
 
     @action(
@@ -179,8 +177,12 @@ class CustomUserViewSet(UserViewSet):
         """Подписка на пользователя."""
         author = self.get_user(id_user=kwargs["id"])
         if request.user == author:
-            raise exceptions.ValidationError("Невозможно подписаться на себя .")
-        _, created = Subscribe.objects.get_or_create(user=request.user, author=author)
+            raise exceptions.ValidationError(
+                "Невозможно подписаться на себя ."
+                )
+        _, created = Subscribe.objects.get_or_create(
+            user=request.user,
+            author=author)
         if not created:
             raise exceptions.ValidationError(f"Вы уже подписаны на {author}")
         serializer = self.get_serializer(author)
