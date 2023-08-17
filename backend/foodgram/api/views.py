@@ -179,7 +179,7 @@ class CustomUserViewSet(UserViewSet):
         if request.user == author:
             raise exceptions.ValidationError(
                 "Невозможно подписаться на себя ."
-                )
+            )
         _, created = Subscribe.objects.get_or_create(
             user=request.user,
             author=author)
