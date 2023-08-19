@@ -131,11 +131,11 @@ class RecipeViewSet(ModelViewSet):
                 if ingredient_name in data:
                     data[
                         ingredient_name
-                        ]["amount"] += int(amount)
+                    ]["amount"] += int(amount)
                 else:
                     data[ingredient_name] = {
                         "amount": int(amount), "unit": ingredient_unit
-                        }
+                    }
         for key in data.keys():
             output.write(f'{key}-{data[key]["amount"]} {data[key]["unit"]}\n')
         filename = "carts.txt"
