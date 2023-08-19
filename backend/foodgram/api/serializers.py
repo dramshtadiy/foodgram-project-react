@@ -181,7 +181,7 @@ class RecipeReadSerializer(ModelSerializer):
 
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(use_url=True)
@@ -268,7 +268,7 @@ class RecipeWriteSerializer(ModelSerializer):
                 raise ValidationError(
                     {"ingredients": "Ингридиенты не могут повторяться!"}
                 )
-            if int(item["amount"]) <= 0:
+            if item["amount"] <= 0:
                 raise ValidationError(
                     {"amount": "Количество ингредиента должно быть больше 0!"}
                 )
@@ -281,7 +281,7 @@ class RecipeWriteSerializer(ModelSerializer):
         RecipeIngredient.objects.bulk_create(
             [
                 RecipeIngredient(
-                    ingredient=Ingredient.objects.get(id=ingredient["id"]),
+                    ingredient_id=ingredient["id"],
                     recipe=recipe,
                     amount=ingredient["amount"],
                 )

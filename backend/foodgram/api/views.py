@@ -125,15 +125,19 @@ class RecipeViewSet(ModelViewSet):
                 "ingredient__name", "ingredient__measurement_unit", "amount"
             ).filter(recipe_id=recipe)
             for item in ingredients:
-                if item[0] in data:
-                    data[item[0]]["amount"] += int(item[2])
+                ingredient_name = item[0]
+                ingredient_unit = item[1]
+                amount = item[2]
+                if ingredient_name in data:
+                    data[
+                        ingredient_name
+                        ]["amount"] += int(amount)
                 else:
-                    data[item[0]] = {
-                        "amount": int(item[2]), "unit": item[1]}
+                    data[ingredient_name] = {
+                        "amount": int(amount), "unit": ingredient_unit
+                        }
         for key in data.keys():
-            output.write(
-                f'{key} - {data[key]["amount"]} {data[key]["unit"]}\n'
-            )
+            output.write(f'{key}-{data[key]["amount"]} {data[key]["unit"]}\n')
         filename = "carts.txt"
         response = FileResponse(output.getvalue(), content_type="text.txt")
         response["Content-Disposition"] = f"attachment; filename={filename}"

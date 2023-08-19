@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 from django.db.models import UniqueConstraint
 
@@ -50,17 +51,18 @@ class Recipe(models.Model):
         User,
         related_name="recipes",
         on_delete=models.CASCADE,
-        null=True,
         verbose_name="автор",
     )
     text = models.TextField("Описание")
     image = models.ImageField("Изображение", upload_to="recipes/img/")
     cooking_time = models.PositiveIntegerField(
         "Время приготовления",
-        validators=[
+        validators=(
             MinValueValidator(
-                1, "Время приготовления не должно быть меньше 1 минуты")
-        ],
+                1, "Время приготовления не должно быть меньше 1 минуты"),
+            MaxValueValidator(
+                999, "Время приготовления не должно быть > 999 минут")
+        ),
     )
 
     tags = models.ManyToManyField(Tag,
@@ -94,11 +96,12 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         "Количество",
-        validators=[
+        validators=(
             MinValueValidator(
-                1,
-                "Время приготовления не должно быть меньше 1 минуты")
-        ],
+                1, "Время приготовления не должно быть меньше 1 минуты"),
+            MaxValueValidator(
+                999, "Время приготовления не должно быть > 999 минут")
+        ),
     )
 
     class Meta:
