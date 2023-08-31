@@ -181,7 +181,9 @@ class RecipeReadSerializer(ModelSerializer):
 
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = IngredientSerializer(many=True)
+    #ingredients = IngredientSerializer(many=True) - не можем реализовать
+    # из-за двух рхныъ таблиц, метод source не совсем удобно тут использовать 
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
     image = Base64ImageField(use_url=True)
